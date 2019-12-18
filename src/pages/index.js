@@ -1,46 +1,66 @@
 import React from "react"
-import { Link, graphql } from "gatsby"
-
+import { graphql, Link } from "gatsby"
+import styled from "styled-components"
 import Layout from "../components/layout"
-import Image from "../components/image"
-import SEO from "../components/seo"
+
+const Title = styled.h1`
+  display: inline-block;
+`
+
+const BlogTitle = styled.h3`
+  margin-bottom: 20px;
+
+  &:hover {
+    color: var(--theme-color);
+  }
+`
+
+const BlogLink = styled(Link)`
+  text-decoration: none;
+  color: inherit;
+`
+
+const BlogBody = styled.div`
+  margin-bottom: 50px;
+`
 
 export default ({ data }) => {
-  console.log(data)
   return (
-  <Layout>
-    <SEO title="Home" />
-    <h3>Gbenga's blog</h3>
-    <h4>{data.allMarkdownRemark.totalCount}</h4>
-    {
-      data.allMarkdownRemark.edges.map(({node}) => 
-        (
-          <div key={node.id}>
-            <h4>{ node.frontmatter.title} - {node.frontmatter.date}</h4>
-            <p>{node.excerpt}</p>
-          </div>
-        )
-      )
-    }
-  </Layout>
-)}
+    <Layout>
+      <div>
+        <Title>Gbenga's Thoughts About Life</Title>
+        <h4>{data.allMarkdownRemark.totalCount} Posts</h4>
+        {data.allMarkdownRemark.edges.map(({ node }) => (
+          <BlogBody key={node.id}>
+            <BlogLink to={node.fields.slug}>
+              <BlogTitle>
+                {node.frontmatter.title} <span>— {node.frontmatter.date}</span>
+              </BlogTitle>
+            </BlogLink>
+            <p>{node.frontmatter.description || node.excerpt}</p>
+          </BlogBody>
+        ))}
+      </div>
+    </Layout>
+  )
+}
 
-
-
-export const query = graphql `
+export const query = graphql`
   query {
-    allMarkdownRemark {
+    allMarkdownRemark(sort: { fields: [frontmatter___date], order: DESC }) {
       totalCount
       edges {
         node {
           id
-          html
-          excerpt
           frontmatter {
-            date
             title
+            date(formatString: "DD MMMM, YYYY")
             description
           }
+          fields {
+            slug
+          }
+          excerpt(truncate: true)
         }
       }
     }
